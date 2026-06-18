@@ -1,6 +1,5 @@
 package com.example.speed;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -72,9 +71,9 @@ public class MainScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Заливка фона тёмным цветом (теперь через fill)
-        context.fill(0, 0, this.width, this.height, 0xFF2C2C2C);
-        // Рисуем заголовок
+        // Градиентный фон
+        this.fillGradient(context, 0, 0, this.width, this.height, 0xFF2C2C2C, 0xFF1A1A1A);
+        // Заголовок
         context.drawCenteredTextWithShadow(this.textRenderer, Text.literal("Speed Mod"), this.width / 2, 40, 0xFFFFFFFF);
         // Отрисовка кнопок
         super.render(context, mouseX, mouseY, delta);
