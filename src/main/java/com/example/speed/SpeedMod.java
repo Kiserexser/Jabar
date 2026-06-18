@@ -1,7 +1,6 @@
 package com.example.speed;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -28,10 +27,18 @@ public class SpeedMod implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("Asik Client is running!");
 
-        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
-            // Показываем главное меню после загрузки клиента
+        // Запускаем поток, который ждёт появления клиента
+        new Thread(() -> {
+            MinecraftClient client = null;
+            while (client == null) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ignored) {}
+                client = MinecraftClient.getInstance();
+            }
+            // Когда клиент появился – показываем главное меню
             client.setScreen(new MainScreen());
-        });
+        }).start();
     }
 
     // ==================== ГЛАВНОЕ МЕНЮ ====================
@@ -71,9 +78,7 @@ public class SpeedMod implements ModInitializer {
 
         @Override
         public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-            // Тёмный фон
             this.fillGradient(context, 0, 0, this.width, this.height, 0xFF1a1a1a, 0xFF0d0d0d);
-            // Заголовок – розовый цвет (#FFB6C1)
             context.drawCenteredTextWithShadow(this.textRenderer,
                     Text.literal("Asik client"), this.width / 2, 30, 0xFFFFB6C1);
             super.render(context, mouseX, mouseY, delta);
@@ -104,13 +109,11 @@ public class SpeedMod implements ModInitializer {
             int centerX = this.width / 2;
             int centerY = this.height / 2;
 
-            // Поле ввода
             addField = new TextFieldWidget(this.textRenderer, centerX - 75, 30, 150, 20,
                     Text.literal("Enter name"));
             addField.setMaxLength(32);
             this.addDrawableChild(addField);
 
-            // Кнопка Add
             this.addDrawableChild(ButtonWidget.builder(Text.literal("Add"),
                             btn -> {
                                 String name = addField.getText().trim();
@@ -125,7 +128,6 @@ public class SpeedMod implements ModInitializer {
                     .dimensions(centerX + 80, 30, 50, 20)
                     .build());
 
-            // Список аккаунтов
             int yPos = 70;
             int spacing = 24;
             for (int i = 0; i < accounts.size(); i++) {
@@ -141,7 +143,6 @@ public class SpeedMod implements ModInitializer {
                         .build());
             }
 
-            // Кнопки управления
             this.addDrawableChild(ButtonWidget.builder(Text.literal("Remove"),
                             btn -> {
                                 if (selectedIndex >= 0 && selectedIndex < accounts.size()) {
@@ -159,14 +160,12 @@ public class SpeedMod implements ModInitializer {
                             btn -> {
                                 if (selectedIndex >= 0 && selectedIndex < accounts.size()) {
                                     String name = accounts.get(selectedIndex);
-                                    // Здесь можно вставить логику выбора аккаунта
                                     System.out.println("[Asik] Selected: " + name);
                                 }
                             })
                     .dimensions(centerX + 110, 100, 60, 20)
                     .build());
 
-            // Кнопка Back
             this.addDrawableChild(ButtonWidget.builder(Text.literal("Back"),
                             btn -> {
                                 if (client != null) client.setScreen(parent);
@@ -181,7 +180,6 @@ public class SpeedMod implements ModInitializer {
             context.drawCenteredTextWithShadow(this.textRenderer,
                     Text.literal("Alt Manager – Asik client"), this.width / 2, 10, 0xFFFFB6C1);
 
-            // Подсветка выбранного аккаунта (розовая рамка)
             if (selectedIndex >= 0 && selectedIndex < accounts.size()) {
                 int yPos = 70 + selectedIndex * 24;
                 int cx = this.width / 2 - 100;
@@ -203,7 +201,6 @@ public class SpeedMod implements ModInitializer {
             return super.charTyped(chr, modifiers);
         }
 
-        // Работа с файлом
         private void loadAccounts() {
             Path path = Paths.get(FILE_NAME);
             if (Files.exists(path)) {
@@ -212,7 +209,7 @@ public class SpeedMod implements ModInitializer {
                     while ((line = reader.readLine()) != null) {
                         if (!line.trim().isEmpty()) accounts.add(line.trim());
                     }
-                } catch (IOException e) { e.printStackTrace(); }
+                } catch (IOException ignored) {}
             }
         }
 
@@ -223,7 +220,7 @@ public class SpeedMod implements ModInitializer {
                     writer.write(acc);
                     writer.newLine();
                 }
-            } catch (IOException e) { e.printStackTrace(); }
+            } catch (IOException ignored) {}
         }
     }
 }
