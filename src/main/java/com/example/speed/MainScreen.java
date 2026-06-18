@@ -27,7 +27,7 @@ public class MainScreen extends Screen {
         int y = centerY - (buttonHeight + spacing) * 2 - 10;
 
         // Singleplayer
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Singleplayer"), 
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("Singleplayer"),
                 (btn) -> {
                     if (this.client != null) {
                         this.client.setScreen(new SelectWorldScreen(this));
@@ -72,16 +72,16 @@ public class MainScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Заливка фона тёмным цветом (можно заменить на изображение)
-        this.fillGradient(context, 0, 0, this.width, this.height, 0xFF2C2C2C, 0xFF1A1A1A);
-        // Рисуем заголовок (опционально)
+        // Заливка фона тёмным цветом (теперь через fill)
+        context.fill(0, 0, this.width, this.height, 0xFF2C2C2C);
+        // Рисуем заголовок
         context.drawCenteredTextWithShadow(this.textRenderer, Text.literal("Speed Mod"), this.width / 2, 40, 0xFFFFFFFF);
-        // Отрисовка кнопок (автоматически через addDrawableChild)
+        // Отрисовка кнопок
         super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
     public boolean shouldCloseOnEsc() {
-        return false; // Чтобы нельзя было выйти по ESC, если хотите – замените на true
+        return false;
     }
 }
