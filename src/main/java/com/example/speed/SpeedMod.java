@@ -11,7 +11,7 @@ public class SpeedMod implements ModInitializer {
     @Override
     public void onInitialize() {
         LOGGER.info("Speed Mod is running!");
-        // Устанавливаем кастомный главный экран при старте
+        // Показываем кастомный экран при запуске
         MinecraftClient.getInstance().setScreen(new MainScreen());
     }
 }
