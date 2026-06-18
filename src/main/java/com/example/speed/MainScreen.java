@@ -25,7 +25,6 @@ public class MainScreen extends Screen {
         int x = centerX - buttonWidth / 2;
         int y = centerY - (buttonHeight + spacing) * 2 - 10;
 
-        // Singleplayer
         this.addDrawableChild(ButtonWidget.builder(Text.literal("Singleplayer"),
                 (btn) -> {
                     if (this.client != null) {
@@ -36,7 +35,6 @@ public class MainScreen extends Screen {
                 .build());
         y += buttonHeight + spacing;
 
-        // Multiplayer
         this.addDrawableChild(ButtonWidget.builder(Text.literal("Multiplayer"),
                 (btn) -> {
                     if (this.client != null) {
@@ -47,7 +45,6 @@ public class MainScreen extends Screen {
                 .build());
         y += buttonHeight + spacing;
 
-        // Options
         this.addDrawableChild(ButtonWidget.builder(Text.literal("Options"),
                 (btn) -> {
                     if (this.client != null) {
@@ -58,7 +55,6 @@ public class MainScreen extends Screen {
                 .build());
         y += buttonHeight + spacing;
 
-        // Exit
         this.addDrawableChild(ButtonWidget.builder(Text.literal("Exit"),
                 (btn) -> {
                     if (this.client != null) {
@@ -71,8 +67,8 @@ public class MainScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Градиентный фон
-        this.fillGradient(context, 0, 0, this.width, this.height, 0xFF2C2C2C, 0xFF1A1A1A);
+        // Рисуем стандартный фон Minecraft с градиентом
+        this.renderBackground(context, mouseX, mouseY, delta);
         // Заголовок
         context.drawCenteredTextWithShadow(this.textRenderer, Text.literal("Speed Mod"), this.width / 2, 40, 0xFFFFFFFF);
         // Отрисовка кнопок
