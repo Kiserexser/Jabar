@@ -1,130 +1,87 @@
 package com.example.speed;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.option.OptionsScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
-import net.minecraft.client.util.Window;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import im.expensive.Expensive;
-import im.expensive.utils.client.ClientUtil;
-import im.expensive.utils.client.IMinecraft;
-import im.expensive.utils.client.Vec2i;
-import im.expensive.utils.math.MathUtil;
-import im.expensive.utils.render.ColorUtils;
-import im.expensive.utils.render.DisplayUtils;
-import im.expensive.utils.render.KawaseBlur;
-import im.expensive.utils.render.Stencil;
-import im.expensive.utils.render.font.Fonts;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class MainScreen extends Screen implements IMinecraft {
-
-    private final Identifier backmenu = new Identifier("expensive", "images/backmenu.png");
-    private final List<Button> buttons = new ArrayList<>();
+public class MainScreen extends Screen {
 
     public MainScreen() {
         super(Text.empty());
     }
 
     @Override
-    public void init(MinecraftClient client, int width, int height) {
-        super.init(client, width, height);
-        buttons.clear();
-        float buttonWidth = 130;
-        float buttonHeight = 30;
-        float spacing = 6;
-        Window window = client.getWindow();
-        int w = ClientUtil.calc(window.getScaledWidth());
-        int h = ClientUtil.calc(window.getScaledHeight());
+    public void init() {
+        int centerX = this.width / 2;
+        int centerY = this.height / 2;
+        int buttonWidth = 130;
+        int buttonHeight = 30;
+        int spacing = 6;
 
-        float x = w - buttonWidth - 16;
-        float y = h - (buttonHeight + spacing) * 4 - 16;
+        int x = centerX - buttonWidth / 2;
+        int y = centerY - (buttonHeight + spacing) * 2 - 10;
 
-        buttons.add(new Button(x, y, buttonWidth, buttonHeight, "Singleplayer", () -> client.setScreen(new SelectWorldScreen(this))));
+        // Singleplayer
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("Singleplayer"), 
+                (btn) -> {
+                    if (this.client != null) {
+                        this.client.setScreen(new SelectWorldScreen(this));
+                    }
+                })
+                .dimensions(x, y, buttonWidth, buttonHeight)
+                .build());
         y += buttonHeight + spacing;
-        buttons.add(new Button(x, y, buttonWidth, buttonHeight, "Multiplayer", () -> client.setScreen(new MultiplayerScreen(this))));
+
+        // Multiplayer
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("Multiplayer"),
+                (btn) -> {
+                    if (this.client != null) {
+                        this.client.setScreen(new MultiplayerScreen(this));
+                    }
+                })
+                .dimensions(x, y, buttonWidth, buttonHeight)
+                .build());
         y += buttonHeight + spacing;
-        buttons.add(new Button(x, y, buttonWidth, buttonHeight, "Options", () -> client.setScreen(new OptionsScreen(this, client.options))));
+
+        // Options
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("Options"),
+                (btn) -> {
+                    if (this.client != null) {
+                        this.client.setScreen(new OptionsScreen(this, this.client.options));
+                    }
+                })
+                .dimensions(x, y, buttonWidth, buttonHeight)
+                .build());
         y += buttonHeight + spacing;
-        buttons.add(new Button(x, y, buttonWidth, buttonHeight, "Exit", () -> client.scheduleStop()));
+
+        // Exit
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("Exit"),
+                (btn) -> {
+                    if (this.client != null) {
+                        this.client.scheduleStop();
+                    }
+                })
+                .dimensions(x, y, buttonWidth, buttonHeight)
+                .build());
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        Window window = client.getWindow();
-        int w = ClientUtil.calc(window.getScaledWidth());
-        int h = ClientUtil.calc(window.getScaledHeight());
-
-        DisplayUtils.drawImage(backmenu, 0, 0, w, h, -1);
-        KawaseBlur.blur.updateBlur(5.0f, 3);
-
-        for (Button button : buttons) {
-            button.render(context, mouseX, mouseY);
-        }
-
-        Expensive.getInstance().getAltWidget().render(context, mouseX, mouseY);
+        // Заливка фона тёмным цветом (можно заменить на изображение)
+        this.fillGradient(context, 0, 0, this.width, this.height, 0xFF2C2C2C, 0xFF1A1A1A);
+        // Рисуем заголовок (опционально)
+        context.drawCenteredTextWithShadow(this.textRenderer, Text.literal("Speed Mod"), this.width / 2, 40, 0xFFFFFFFF);
+        // Отрисовка кнопок (автоматически через addDrawableChild)
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        Vec2i fixed = ClientUtil.getMouse((int) mouseX, (int) mouseY);
-        buttons.forEach(b -> b.click(fixed.getX(), fixed.getY(), button));
-        Expensive.getInstance().getAltWidget().click(fixed.getX(), fixed.getY(), button);
-        return true;
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double vertical) {
-        Expensive.getInstance().getAltWidget().updateScroll((int) mouseX, (int) mouseY, (float) vertical);
-        return true;
-    }
-
-    @Override
-    public boolean charTyped(char chr, int modifiers) {
-        Expensive.getInstance().getAltWidget().onChar(chr);
-        return true;
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        Expensive.getInstance().getAltWidget().onKey(keyCode);
-        return true;
-    }
-
-    @AllArgsConstructor
-    private class Button {
-        @Getter private final float x, y, width, height;
-        private final String text;
-        private final Runnable action;
-
-        public void render(DrawContext context, int mouseX, int mouseY) {
-            boolean hovered = MathUtil.isHovered(mouseX, mouseY, x, y, width, height);
-
-            Stencil.initStencilToWrite();
-            DisplayUtils.drawRoundedRect(x, y, width, height, 5, ColorUtils.rgb(255, 255, 255));
-            Stencil.readStencilBuffer(1);
-            KawaseBlur.blur.BLURRED.draw();
-            Stencil.uninitStencilBuffer();
-
-            DisplayUtils.drawRoundedRect(x, y, width, height, 5, ColorUtils.rgba(0, 0, 0, hovered ? 210 : 180));
-
-            int color = hovered ? ColorUtils.rgb(255, 255, 255) : ColorUtils.rgb(210, 210, 210);
-            Fonts.montserrat.drawCenteredText(context.getMatrices(), text, x + width / 2f, y + height / 2f - 4.5f, color, 9f);
-        }
-
-        public void click(int mouseX, int mouseY, int button) {
-            if (MathUtil.isHovered(mouseX, mouseY, x, y, width, height)) {
-                action.run();
-            }
-        }
+    public boolean shouldCloseOnEsc() {
+        return false; // Чтобы нельзя было выйти по ESC, если хотите – замените на true
     }
 }
