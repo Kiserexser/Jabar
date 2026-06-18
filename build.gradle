@@ -7,7 +7,7 @@ version = '1.0.0'
 group = 'com.example.speed'
 
 base {
-    archivesName = "asik-client"  // можно переименовать, но не обязательно
+    archivesName = "speed-mod"
 }
 
 repositories {
@@ -22,8 +22,6 @@ dependencies {
     minecraft "com.mojang:minecraft:1.21.4"
     mappings "net.fabricmc:yarn:1.21.4+build.1:v2"
     modImplementation "net.fabricmc:fabric-loader:0.15.11"
-    // Добавляем Fabric API
-    modImplementation "net.fabricmc.fabric-api:fabric-api:0.119.4+1.21.4"
 }
 
 processResources {
